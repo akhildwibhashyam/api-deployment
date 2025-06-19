@@ -1,0 +1,90 @@
+name: Cleanup Resources
+
+on:
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        env: [dev, prod]
+        region: [us-east-2, us-east-1]
+    environment: ${{ matrix.env }}
+    env:
+      DEPLOY_ENV: ${{ matrix.env }}
+      CDK_DEFAULT_REGION: ${{ matrix.region }}
+      UNIQUE_ID: ${{ github.run_id }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.CDK_DEFAULT_REGION }}
+      - name: Bootstrap CDK (if needed)
+        run: |
+          npm install -g aws-cdk
+          cd InfrastructureAsCode/InfrastructureAsCode
+          cdk bootstrap aws://$(aws sts get-caller-identity --query Account --output text)/${{ env.CDK_DEFAULT_REGION }} || true
+      - name: Delete all ECR images and repositories
+        run: |
+          set -e
+          # List all ECR repositories for this environment/region (including uniqueId suffix)
+          REPO_PREFIX="product-management-system-${{ env.DEPLOY_ENV }}"
+          UNIQUE_ID="${{ env.UNIQUE_ID }}"
+          # Find all repos that match the exact naming pattern (with or without uniqueId)
+          REPOS=$(aws ecr describe-repositories --region "${{ env.CDK_DEFAULT_REGION }}" --query "repositories[?starts_with(repositoryName, '$REPO_PREFIX')].repositoryName" --output text)
+          for REPO in $REPOS; do
+            # If uniqueId is set, only delete repos that end with the uniqueId, else delete all matching
+            if [[ -n "$UNIQUE_ID" ]]; then
+              if [[ "$REPO" == *"-$UNIQUE_ID" ]]; then
+                echo "Cleaning up ECR repository: $REPO (matches uniqueId)"
+              else
+                echo "Skipping ECR repository: $REPO (does not match uniqueId)"
+                continue
+              fi
+            else
+              echo "Cleaning up ECR repository: $REPO"
+            fi
+            IMAGE_IDS=$(aws ecr list-images --repository-name "$REPO" --region "${{ env.CDK_DEFAULT_REGION }}" --query 'imageIds[*]' --output json)
+            if [ "$IMAGE_IDS" != "[]" ]; then
+              echo "$IMAGE_IDS" > image_ids.json
+              aws ecr batch-delete-image --repository-name "$REPO" --region "${{ env.CDK_DEFAULT_REGION }}" --image-ids file://image_ids.json || echo "::warning::Failed to delete some images in $REPO"
+              rm -f image_ids.json
+            fi
+            aws ecr delete-repository --repository-name "$REPO" --region "${{ env.CDK_DEFAULT_REGION }}" --force || echo "::warning::Failed to delete ECR repository: $REPO (may not exist or already deleted)"
+          done
+          echo "ECR cleanup complete."
+      - name: Delete CloudWatch Dashboard
+        run: |
+          DASHBOARD_NAME="product-management-${{ env.DEPLOY_ENV }}-${{ env.UNIQUE_ID }}"
+          if aws cloudwatch get-dashboard --dashboard-name "$DASHBOARD_NAME" --region "${{ env.CDK_DEFAULT_REGION }}" 2>/dev/null; then
+            aws cloudwatch delete-dashboard --dashboard-name "$DASHBOARD_NAME" --region "${{ env.CDK_DEFAULT_REGION }}"
+            echo "Deleted CloudWatch dashboard: $DASHBOARD_NAME"
+          else
+            echo "CloudWatch dashboard does not exist: $DASHBOARD_NAME"
+          fi
+      - name: Destroy all CDK stacks
+        run: |
+          set -e
+          npm install -g aws-cdk
+          cd InfrastructureAsCode/InfrastructureAsCode
+          dotnet build
+          stacks=(
+            "ECSFargateServiceStack-${{ env.DEPLOY_ENV }}"
+            "ContainerRegistryStack-${{ env.DEPLOY_ENV }}"
+            "DatabaseStack-${{ env.DEPLOY_ENV }}"
+            "NetworkStack-${{ env.DEPLOY_ENV }}"
+          )
+          for stack in "${stacks[@]}"; do
+            echo "Attempting to destroy stack: $stack"
+            if cdk destroy $stack --force; then
+              echo "Successfully destroyed stack: $stack"
+            else
+              echo "::warning::Failed to destroy stack: $stack (may not exist or already deleted)"
+            fi
+          done
+          echo "Cleanup complete."

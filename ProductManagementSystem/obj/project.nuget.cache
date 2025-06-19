@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "++e+KIFgxtI=",
+  "dgSpecHash": "Q+B8K+Pcovo=",
   "success": true,
-  "projectFilePath": "/Users/akhildwibhashyam/Desktop/DevOps_Assignment/Testing/devops-assignment-round-1-adwibha/DevOpsAssignment/ProductManagementSystem/ProductManagementSystem.csproj",
+  "projectFilePath": "/Users/akhildwibhashyam/Desktop/DevOps_Assignment/Testing/devops-assignment-round-1-adwibha/test-repo-old-github/api-deployment/ProductManagementSystem/ProductManagementSystem.csproj",
   "expectedPackageFiles": [
     "/Users/akhildwibhashyam/.nuget/packages/awssdk.core/3.7.402.20/awssdk.core.3.7.402.20.nupkg.sha512",
     "/Users/akhildwibhashyam/.nuget/packages/awssdk.dynamodbv2/3.7.406.2/awssdk.dynamodbv2.3.7.406.2.nupkg.sha512",

@@ -1139,11 +1139,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "/Users/akhildwibhashyam/Desktop/DevOps_Assignment/Testing/devops-assignment-round-1-adwibha/DevOpsAssignment/InfrastructureAsCode/InfrastructureAsCode/InfrastructureAsCode.csproj",
+      "projectUniqueName": "/Users/akhildwibhashyam/Desktop/DevOps_Assignment/Testing/devops-assignment-round-1-adwibha/test-repo-old-github/api-deployment/InfrastructureAsCode/InfrastructureAsCode/InfrastructureAsCode.csproj",
       "projectName": "InfrastructureAsCode",
-      "projectPath": "/Users/akhildwibhashyam/Desktop/DevOps_Assignment/Testing/devops-assignment-round-1-adwibha/DevOpsAssignment/InfrastructureAsCode/InfrastructureAsCode/InfrastructureAsCode.csproj",
+      "projectPath": "/Users/akhildwibhashyam/Desktop/DevOps_Assignment/Testing/devops-assignment-round-1-adwibha/test-repo-old-github/api-deployment/InfrastructureAsCode/InfrastructureAsCode/InfrastructureAsCode.csproj",
       "packagesPath": "/Users/akhildwibhashyam/.nuget/packages/",
-      "outputPath": "/Users/akhildwibhashyam/Desktop/DevOps_Assignment/Testing/devops-assignment-round-1-adwibha/DevOpsAssignment/InfrastructureAsCode/InfrastructureAsCode/obj/",
+      "outputPath": "/Users/akhildwibhashyam/Desktop/DevOps_Assignment/Testing/devops-assignment-round-1-adwibha/test-repo-old-github/api-deployment/InfrastructureAsCode/InfrastructureAsCode/obj/",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "/Users/akhildwibhashyam/.nuget/NuGet/NuGet.Config"

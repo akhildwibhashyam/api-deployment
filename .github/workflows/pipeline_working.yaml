@@ -1,0 +1,468 @@
+name: CDK Deployment Pipeline - Working together
+
+on:
+  workflow_dispatch:
+
+jobs:
+  bootstrap:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        env: [dev, prod]
+        region: [us-east-2, us-east-1]
+    environment: ${{ matrix.env }}
+    env:
+      DEPLOY_ENV: ${{ matrix.env }}
+      CDK_DEFAULT_REGION: ${{ matrix.region }}
+      UNIQUE_ID: ${{ github.run_id }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.CDK_DEFAULT_REGION }}
+      - name: Bootstrap CDK Environment
+        run: |
+          npm install -g aws-cdk
+          cd InfrastructureAsCode/InfrastructureAsCode
+          cdk bootstrap aws://$(aws sts get-caller-identity --query Account --output text)/${{ env.CDK_DEFAULT_REGION }}
+
+  network:
+    runs-on: ubuntu-latest
+    needs: [bootstrap, test]
+    strategy:
+      matrix:
+        env: [dev, prod]
+        region: [us-east-2, us-east-1]
+    environment: ${{ matrix.env }}
+    env:
+      DEPLOY_ENV: ${{ matrix.env }}
+      CDK_DEFAULT_REGION: ${{ matrix.region }}
+      UNIQUE_ID: ${{ github.run_id }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.CDK_DEFAULT_REGION }}
+      - name: ":white_check_mark: Build Network Stack"
+        run: |
+          npm install -g aws-cdk
+          cd InfrastructureAsCode/InfrastructureAsCode
+          dotnet build
+          cdk deploy NetworkStack-${{ env.DEPLOY_ENV }} --require-approval never
+
+  database:
+    runs-on: ubuntu-latest
+    needs: [bootstrap, test]
+    strategy:
+      matrix:
+        env: [dev, prod]
+        region: [us-east-2, us-east-1]
+    environment: ${{ matrix.env }}
+    env:
+      DEPLOY_ENV: ${{ matrix.env }}
+      CDK_DEFAULT_REGION: ${{ matrix.region }}
+      UNIQUE_ID: ${{ github.run_id }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.CDK_DEFAULT_REGION }}
+      - name: ":white_check_mark: Build Database Stack"
+        run: |
+          npm install -g aws-cdk
+          cd InfrastructureAsCode/InfrastructureAsCode
+          dotnet build
+          cdk deploy DatabaseStack-${{ env.DEPLOY_ENV }} --require-approval never
+
+  ecr:
+    runs-on: ubuntu-latest
+    needs: [bootstrap, test]
+    strategy:
+      matrix:
+        env: [dev, prod]
+        region: [us-east-2, us-east-1]
+    environment: ${{ matrix.env }}
+    env:
+      DEPLOY_ENV: ${{ matrix.env }}
+      CDK_DEFAULT_REGION: ${{ matrix.region }}
+      UNIQUE_ID: ${{ github.run_id }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.CDK_DEFAULT_REGION }}
+      - name: ":white_check_mark: Build ECR Stack"
+        run: |
+          npm install -g aws-cdk
+          cd InfrastructureAsCode/InfrastructureAsCode
+          dotnet build
+          cdk deploy ContainerRegistryStack-${{ env.DEPLOY_ENV }} --require-approval never
+
+  build:
+    runs-on: ubuntu-latest
+    needs: [network, database, ecr]
+    strategy:
+      matrix:
+        env: [dev, prod]
+        region: [us-east-2, us-east-1]
+    environment: ${{ matrix.env }}
+    outputs:
+      repository_name: ${{ steps.ecr-info.outputs.repository_name }}
+    env:
+      DEPLOY_ENV: ${{ matrix.env }}
+      CDK_DEFAULT_REGION: ${{ matrix.region }}
+      UNIQUE_ID: ${{ github.run_id }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.CDK_DEFAULT_REGION }}
+
+      - name: ":white_check_mark: Setup ECR Repository"
+        id: ecr-info
+        run: |
+          # Set repository name
+          REPOSITORY_NAME="product-management-system-${{ env.DEPLOY_ENV }}-${{ env.UNIQUE_ID }}"
+          echo "repository_name=$REPOSITORY_NAME" >> $GITHUB_OUTPUT
+          
+          # Get AWS account ID for ECR URI
+          AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          
+          # Create repository if it doesn't exist
+          aws ecr describe-repositories --repository-names $REPOSITORY_NAME --region ${{ env.CDK_DEFAULT_REGION }} || \
+          aws ecr create-repository --repository-name $REPOSITORY_NAME --region ${{ env.CDK_DEFAULT_REGION }}
+          
+          # Set environment variables for subsequent steps
+          echo "ECR_REPOSITORY_URI=${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.CDK_DEFAULT_REGION }}.amazonaws.com/$REPOSITORY_NAME" >> $GITHUB_ENV
+      
+      - name: ":white_check_mark: Build Docker Image"
+        id: docker
+        env:
+          ECR_REPOSITORY_URI: ${{ env.ECR_REPOSITORY_URI }}
+          GIT_SHA: ${{ github.sha }}
+        run: |
+          # Get ECR registry URL (remove repository name from URI)
+          ECR_REGISTRY=$(echo $ECR_REPOSITORY_URI | cut -d'/' -f1)
+          # Login to ECR before building (required for multi-stage builds or private base images)
+          aws ecr get-login-password --region ${{ env.CDK_DEFAULT_REGION }} | docker login --username AWS --password-stdin $ECR_REGISTRY
+          # Build the images
+          docker build -t $ECR_REPOSITORY_URI:${GIT_SHA} ProductManagementSystem
+          docker tag $ECR_REPOSITORY_URI:${GIT_SHA} $ECR_REPOSITORY_URI:latest
+          # Push images so scan job can pull them
+          docker push $ECR_REPOSITORY_URI:${GIT_SHA}
+          docker push $ECR_REPOSITORY_URI:latest
+
+  scan:
+    needs: build
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        env: [dev, prod]
+        region: [us-east-2, us-east-1]
+    environment: ${{ matrix.env }}
+    env:
+      DEPLOY_ENV: ${{ matrix.env }}
+      CDK_DEFAULT_REGION: ${{ matrix.region }}
+      UNIQUE_ID: ${{ github.run_id }}
+    steps:
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.CDK_DEFAULT_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Get ECR credentials and image
+        id: ecr-creds
+        run: |
+          # Get AWS account ID
+          AWS_ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          
+          # Construct ECR URI
+          IMAGE_URI="${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.CDK_DEFAULT_REGION }}.amazonaws.com/${{ needs.build.outputs.repository_name }}:${{ github.sha }}"
+          echo "image_uri=$IMAGE_URI" >> $GITHUB_OUTPUT
+          
+          # Get ECR login password and mask it
+          ECR_PASSWORD=$(aws ecr get-login-password --region ${{ env.CDK_DEFAULT_REGION }})
+          # echo "::add-mask::$ECR_PASSWORD"
+          
+          # Login to ECR using the masked password
+          echo "$ECR_PASSWORD" | docker login --username AWS --password-stdin ${AWS_ACCOUNT_ID}.dkr.ecr.${{ env.CDK_DEFAULT_REGION }}.amazonaws.com
+          
+          echo "Pulling image: $IMAGE_URI"
+          docker pull $IMAGE_URI || exit 1
+          
+          # Tag for local scanning
+          docker tag $IMAGE_URI local-scan-image:${{ github.sha }}
+          echo "SCAN_IMAGE_REF=local-scan-image:${{ github.sha }}" >> $GITHUB_ENV
+
+      - name: ":shield: Run Trivy vulnerability scanner"
+        uses: aquasecurity/trivy-action@master
+        with:
+          image-ref: ${{ env.SCAN_IMAGE_REF }}
+          format: 'table'
+          exit-code: '1'
+          ignore-unfixed: true
+          vuln-type: 'os,library'
+          severity: 'CRITICAL,HIGH'
+          timeout: '15m'
+
+  deploy-fargate:
+    runs-on: ubuntu-latest
+    needs: scan
+    strategy:
+      matrix:
+        env: [dev, prod]
+        region: [us-east-2, us-east-1]
+    environment: ${{ matrix.env }}
+    env:
+      DEPLOY_ENV: ${{ matrix.env }}
+      CDK_DEFAULT_REGION: ${{ matrix.region }}
+      UNIQUE_ID: ${{ github.run_id }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.CDK_DEFAULT_REGION }}
+      - name: ":white_check_mark: Deploy Fargate Stack"
+        id: fargate
+        env:
+          CDK_DEFAULT_ACCOUNT: ${{ secrets.AWS_ACCOUNT_ID }}
+          CDK_DEFAULT_REGION: ${{ env.CDK_DEFAULT_REGION }}
+          ECR_IMAGE_TAG: ${{ github.sha }}
+        run: |
+          npm install -g aws-cdk
+          cd InfrastructureAsCode/InfrastructureAsCode
+          dotnet build
+          cdk deploy ECSFargateServiceStack-${{ env.DEPLOY_ENV }} --require-approval never
+      - name: ":white_check_mark: Output Load Balancer URL"
+        run: |
+          LB_DNS=$(aws cloudformation describe-stacks --stack-name ECSFargateServiceStack-${{ env.DEPLOY_ENV }} --region ${{ env.CDK_DEFAULT_REGION }} --query "Stacks[0].Outputs[?OutputKey=='ProductManagementFargateServiceLoadBalancerDNS7111EF6D'].OutputValue" --output text)
+          echo "Load Balancer URL: http://$LB_DNS" | tee -a $GITHUB_STEP_SUMMARY
+
+  monitoring-setup:
+    runs-on: ubuntu-latest
+    needs: deploy-fargate
+    strategy:
+      matrix:
+        env: [dev, prod]
+        region: [us-east-2, us-east-1]
+    environment: ${{ matrix.env }}
+    env:
+      DEPLOY_ENV: ${{ matrix.env }}
+      CDK_DEFAULT_REGION: ${{ matrix.region }}
+      UNIQUE_ID: ${{ github.run_id }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.CDK_DEFAULT_REGION }}
+
+      - name: ":chart_with_upwards_trend: Setup CloudWatch Dashboard"
+        run: |
+          chmod +x ./scripts/generate_dashboard.sh
+          ./scripts/generate_dashboard.sh
+
+  test:
+    runs-on: ubuntu-latest
+    needs: bootstrap
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Setup working directory
+        run: |
+          pwd
+          ls -la
+          echo "Current directory contents:"
+          ls -R
+
+      - name: Restore solution
+        run: |
+          dotnet restore DevOpsAssignment.sln
+
+      - name: Verify project files
+        run: |
+          echo "Checking test project files:"
+          cat ProductManagementSystem.Tests/ProductManagementSystem.Tests.csproj
+          echo "----------------------------------------"
+          cat InfrastructureAsCode.Tests/InfrastructureAsCode.Tests.csproj
+
+      - name: Build and test
+        run: |
+          dotnet build --configuration Release
+          dotnet test --configuration Release --verbosity normal --logger "console;verbosity=detailed"
+
+  cleanup:
+    if: always() && (failure() || cancelled())
+    runs-on: ubuntu-latest
+    needs: [bootstrap, test, network, database, ecr, build, scan, deploy-fargate, monitoring-setup]
+    strategy:
+      matrix:
+        env: [dev, prod]
+        region: [us-east-2, us-east-1]
+    environment: ${{ matrix.env }}
+    env:
+      DEPLOY_ENV: ${{ matrix.env }}
+      CDK_DEFAULT_REGION: ${{ matrix.region }}
+      UNIQUE_ID: ${{ github.run_id }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.CDK_DEFAULT_REGION }}
+      - name: Bootstrap CDK (if needed)
+        run: |
+          npm install -g aws-cdk
+          cd InfrastructureAsCode/InfrastructureAsCode
+          cdk bootstrap aws://$(aws sts get-caller-identity --query Account --output text)/${{ env.CDK_DEFAULT_REGION }} || true
+      - name: Delete all ECR images and repositories
+        run: |
+          set -e
+          # List all ECR repositories for this environment/region
+          REPO_PREFIX="product-management-system-${{ env.DEPLOY_ENV }}"
+          REPOS=$(aws ecr describe-repositories --region "${{ env.CDK_DEFAULT_REGION }}" --query "repositories[?starts_with(repositoryName, '$REPO_PREFIX')].repositoryName" --output text)
+          for REPO in $REPOS; do
+            echo "Cleaning up ECR repository: $REPO"
+            IMAGE_IDS=$(aws ecr list-images --repository-name "$REPO" --region "${{ env.CDK_DEFAULT_REGION }}" --query 'imageIds[*]' --output json)
+            if [ "$IMAGE_IDS" != "[]" ]; then
+              echo "$IMAGE_IDS" > image_ids.json
+              aws ecr batch-delete-image --repository-name "$REPO" --region "${{ env.CDK_DEFAULT_REGION }}" --image-ids file://image_ids.json || echo "::warning::Failed to delete some images in $REPO"
+              rm -f image_ids.json
+            fi
+            aws ecr delete-repository --repository-name "$REPO" --region "${{ env.CDK_DEFAULT_REGION }}" --force || echo "::warning::Failed to delete ECR repository: $REPO (may not exist or already deleted)"
+          done
+          echo "ECR cleanup complete."
+      - name: Delete CloudWatch Dashboard
+        run: |
+          DASHBOARD_NAME="product-management-${{ env.DEPLOY_ENV }}-${{ env.UNIQUE_ID }}"
+          if aws cloudwatch get-dashboard --dashboard-name "$DASHBOARD_NAME" --region "${{ env.CDK_DEFAULT_REGION }}" 2>/dev/null; then
+            aws cloudwatch delete-dashboard --dashboard-name "$DASHBOARD_NAME" --region "${{ env.CDK_DEFAULT_REGION }}"
+            echo "Deleted CloudWatch dashboard: $DASHBOARD_NAME"
+          else
+            echo "CloudWatch dashboard does not exist: $DASHBOARD_NAME"
+          fi
+      - name: Destroy all CDK stacks
+        run: |
+          set -e
+          npm install -g aws-cdk
+          cd InfrastructureAsCode/InfrastructureAsCode
+          dotnet build
+          stacks=(
+            "ECSFargateServiceStack-${{ env.DEPLOY_ENV }}"
+            "ContainerRegistryStack-${{ env.DEPLOY_ENV }}"
+            "DatabaseStack-${{ env.DEPLOY_ENV }}"
+            "NetworkStack-${{ env.DEPLOY_ENV }}"
+          )
+          for stack in "${stacks[@]}"; do
+            echo "Attempting to destroy stack: $stack"
+            if cdk destroy $stack --force; then
+              echo "Successfully destroyed stack: $stack"
+            else
+              echo "::warning::Failed to destroy stack: $stack (may not exist or already deleted)"
+            fi
+          done
+          echo "Cleanup complete."
+
+  notify:
+    needs: [bootstrap, test, network, database, ecr, build, scan, deploy-fargate, monitoring-setup]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Get deployment status
+        id: deployment
+        run: |
+          # Check status of all required jobs
+          if [[ "${{ needs.bootstrap.result }}" == "success" ]] && \
+             [[ "${{ needs.test.result }}" == "success" ]] && \
+             [[ "${{ needs.network.result }}" == "success" ]] && \
+             [[ "${{ needs.database.result }}" == "success" ]] && \
+             [[ "${{ needs.ecr.result }}" == "success" ]] && \
+             [[ "${{ needs.build.result }}" == "success" ]] && \
+             [[ "${{ needs.scan.result }}" == "success" ]] && \
+             [[ "${{ needs.deploy-fargate.result }}" == "success" ]] && \
+             [[ "${{ needs.monitoring-setup.result }}" == "success" ]]; then
+            echo "STATUS=success" >> $GITHUB_OUTPUT
+            echo "COLOR=good" >> $GITHUB_OUTPUT
+          else
+            echo "STATUS=failure" >> $GITHUB_OUTPUT
+            echo "COLOR=danger" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Send email notification
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.SMTP_SERVER }}
+          server_port: ${{ secrets.SMTP_PORT }}
+          username: ${{ secrets.SMTP_USERNAME }}
+          password: ${{ secrets.SMTP_PASSWORD }}
+          subject: "Deployment ${{ steps.deployment.outputs.STATUS }}: Product Management System"
+          from: ${{ secrets.SMTP_FROM }}
+          to: ${{ secrets.NOTIFICATION_EMAIL }}
+          html_body: |
+            <html>
+              <body>
+                <h1 style="color: ${{ steps.deployment.outputs.STATUS == 'success' && '#28a745' || '#dc3545' }}">
+                  Deployment Status: ${{ steps.deployment.outputs.STATUS }}
+                </h1>
+                <p>Repository: ${{ github.repository }}</p>
+                <p>Commit: ${{ github.sha }}</p>
+                <p>Author: ${{ github.actor }}</p>
+                <p>GitHub Run: <a href="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}">View Pipeline Run</a></p>
+                <h2>Job Results:</h2>
+                <ul>
+                  <li>Bootstrap: ${{ needs.bootstrap.result }}</li>
+                  <li>Tests: ${{ needs.test.result }}</li>
+                  <li>Network Stack: ${{ needs.network.result }}</li>
+                  <li>Database Stack: ${{ needs.database.result }}</li>
+                  <li>ECR Stack: ${{ needs.ecr.result }}</li>
+                  <li>Build: ${{ needs.build.result }}</li>
+                  <li>Scan: ${{ needs.scan.result }}</li>
+                  <li>Fargate Deployment: ${{ needs.deploy-fargate.result }}</li>
+                  <li>Monitoring Setup: ${{ needs.monitoring-setup.result }}</li>
+                </ul>
+              </body>
+            </html>

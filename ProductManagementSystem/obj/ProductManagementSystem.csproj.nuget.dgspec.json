@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "/Users/akhildwibhashyam/Desktop/DevOps_Assignment/Testing/devops-assignment-round-1-adwibha/DevOpsAssignment/ProductManagementSystem/ProductManagementSystem.csproj": {}
+    "/Users/akhildwibhashyam/Desktop/DevOps_Assignment/Testing/devops-assignment-round-1-adwibha/test-repo-old-github/api-deployment/ProductManagementSystem/ProductManagementSystem.csproj": {}
   },
   "projects": {
-    "/Users/akhildwibhashyam/Desktop/DevOps_Assignment/Testing/devops-assignment-round-1-adwibha/DevOpsAssignment/ProductManagementSystem/ProductManagementSystem.csproj": {
+    "/Users/akhildwibhashyam/Desktop/DevOps_Assignment/Testing/devops-assignment-round-1-adwibha/test-repo-old-github/api-deployment/ProductManagementSystem/ProductManagementSystem.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "/Users/akhildwibhashyam/Desktop/DevOps_Assignment/Testing/devops-assignment-round-1-adwibha/DevOpsAssignment/ProductManagementSystem/ProductManagementSystem.csproj",
+        "projectUniqueName": "/Users/akhildwibhashyam/Desktop/DevOps_Assignment/Testing/devops-assignment-round-1-adwibha/test-repo-old-github/api-deployment/ProductManagementSystem/ProductManagementSystem.csproj",
         "projectName": "ProductManagementSystem",
-        "projectPath": "/Users/akhildwibhashyam/Desktop/DevOps_Assignment/Testing/devops-assignment-round-1-adwibha/DevOpsAssignment/ProductManagementSystem/ProductManagementSystem.csproj",
+        "projectPath": "/Users/akhildwibhashyam/Desktop/DevOps_Assignment/Testing/devops-assignment-round-1-adwibha/test-repo-old-github/api-deployment/ProductManagementSystem/ProductManagementSystem.csproj",
         "packagesPath": "/Users/akhildwibhashyam/.nuget/packages/",
-        "outputPath": "/Users/akhildwibhashyam/Desktop/DevOps_Assignment/Testing/devops-assignment-round-1-adwibha/DevOpsAssignment/ProductManagementSystem/obj/",
+        "outputPath": "/Users/akhildwibhashyam/Desktop/DevOps_Assignment/Testing/devops-assignment-round-1-adwibha/test-repo-old-github/api-deployment/ProductManagementSystem/obj/",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "/Users/akhildwibhashyam/.nuget/NuGet/NuGet.Config"
