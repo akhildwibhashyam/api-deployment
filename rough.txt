@@ -1,0 +1,91 @@
+Here are ASCII diagrams you can use as a base for drawing in draw.io. These represent both the architecture and the CI/CD pipeline for your solution.
+
+---
+
+### 1. Architecture Diagram (ASCII)
+
+```shell
++-------------------+         +-------------------+         +-------------------+
+|                   |         |                   |         |                   |
+|   Developer/CI    +-------->+   GitHub Actions  +-------->+   AWS CDK Deploy  |
+|                   |         |   (Pipeline)      |         |   (Infra as Code) |
++-------------------+         +-------------------+         +-------------------+
+                                                                |
+                                                                v
+                                                        +-------------------+
+                                                        |                   |
+                                                        |    AWS VPC        |
+                                                        |  (NetworkStack)   |
+                                                        +-------------------+
+                                                                |
+                                                                v
++-------------------+         +-------------------+         +-------------------+
+|                   |         |                   |         |                   |
+|   AWS ECR         |<--------+   ECS Fargate     +<--------+   ALB             |
+| (ECRStack)        |  Pulls  | (ECSStack)        |  Routes | (ALB in ECSStack) |
++-------------------+  Image  +-------------------+  Traffic+-------------------+
+        ^                                                        |
+        |                                                        v
++-------------------+                                    +-------------------+
+|                   |                                    |                   |
+|   Docker Build    +----------------------------------->+   Product API     |
+|   (GitHub Actions)|   Pushes Image to ECR              |   (Container)     |
++-------------------+                                    +-------------------+
+
++-------------------+
+|                   |
+|   DynamoDB        |
+| (DatabaseStack)   |
++-------------------+
+```
+
+---
+
+### 2. CI/CD Pipeline Diagram (ASCII)
+
+```shell
++-------------------+
+|   Developer Push  |
++--------+----------+
+         |
+         v
++-------------------+
+| GitHub Actions    |
+| pipeline.yaml     |
++--------+----------+
+         |
+         v
++-------------------+
+|  Build & Test     |
+|  .NET App         |
++--------+----------+
+         |
+         v
++-------------------+
+|  Docker Build     |
+|  Push to ECR      |
++--------+----------+
+         |
+         v
++-------------------+
+|  CDK Deploy       |
+|  (Network, DB,    |
+|   ECR, ECS, ALB)  |
++--------+----------+
+         |
+         v
++-------------------+
+|  ECS Service      |
+|  Pulls Image      |
++--------+----------+
+         |
+         v
++-------------------+
+|  App Running      |
+|  Behind ALB       |
++-------------------+
+```
+
+---
+
+You can copy these diagrams into draw.io and use them as a reference to create clean, professional diagrams for your documentation or submission. Let me know if you want a more detailed breakdown or specific component relationships!

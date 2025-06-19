@@ -1,0 +1,538 @@
+{
+  "version": "40.0.0",
+  "artifacts": {
+    "NetworkStack-dev.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "NetworkStack-dev.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "NetworkStack-dev": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://205930626213/us-east-2",
+      "properties": {
+        "templateFile": "NetworkStack-dev.template.json",
+        "terminationProtection": false,
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::205930626213:role/cdk-hnb659fds-deploy-role-205930626213-us-east-2",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::205930626213:role/cdk-hnb659fds-cfn-exec-role-205930626213-us-east-2",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-205930626213-us-east-2/c5ce0978971da570aa5c4788f5b59df6c63c611cf0169114756998d7d5e1ab42.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "NetworkStack-dev.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::205930626213:role/cdk-hnb659fds-lookup-role-205930626213-us-east-2",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "NetworkStack-dev.assets"
+      ],
+      "metadata": {
+        "/NetworkStack-dev/ProductManagementVpc/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementVpc10564D87"
+          }
+        ],
+        "/NetworkStack-dev/ProductManagementVpc/PublicSubnet1/Subnet": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementVpcPublicSubnet1Subnet81E1FB93"
+          }
+        ],
+        "/NetworkStack-dev/ProductManagementVpc/PublicSubnet1/RouteTable": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementVpcPublicSubnet1RouteTableEB51BD7B"
+          }
+        ],
+        "/NetworkStack-dev/ProductManagementVpc/PublicSubnet1/RouteTableAssociation": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementVpcPublicSubnet1RouteTableAssociation2C8B4E91"
+          }
+        ],
+        "/NetworkStack-dev/ProductManagementVpc/PublicSubnet1/DefaultRoute": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementVpcPublicSubnet1DefaultRoute9832764D"
+          }
+        ],
+        "/NetworkStack-dev/ProductManagementVpc/PublicSubnet1/EIP": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementVpcPublicSubnet1EIP6AF05476"
+          }
+        ],
+        "/NetworkStack-dev/ProductManagementVpc/PublicSubnet1/NATGateway": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementVpcPublicSubnet1NATGateway1D9DF538"
+          }
+        ],
+        "/NetworkStack-dev/ProductManagementVpc/PublicSubnet2/Subnet": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementVpcPublicSubnet2SubnetC29A34F8"
+          }
+        ],
+        "/NetworkStack-dev/ProductManagementVpc/PublicSubnet2/RouteTable": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementVpcPublicSubnet2RouteTable00D68075"
+          }
+        ],
+        "/NetworkStack-dev/ProductManagementVpc/PublicSubnet2/RouteTableAssociation": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementVpcPublicSubnet2RouteTableAssociationEA247F16"
+          }
+        ],
+        "/NetworkStack-dev/ProductManagementVpc/PublicSubnet2/DefaultRoute": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementVpcPublicSubnet2DefaultRoute3754CB33"
+          }
+        ],
+        "/NetworkStack-dev/ProductManagementVpc/PrivateSubnet1/Subnet": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementVpcPrivateSubnet1SubnetA221E230"
+          }
+        ],
+        "/NetworkStack-dev/ProductManagementVpc/PrivateSubnet1/RouteTable": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementVpcPrivateSubnet1RouteTable2954D7E5"
+          }
+        ],
+        "/NetworkStack-dev/ProductManagementVpc/PrivateSubnet1/RouteTableAssociation": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementVpcPrivateSubnet1RouteTableAssociationE381A4FD"
+          }
+        ],
+        "/NetworkStack-dev/ProductManagementVpc/PrivateSubnet1/DefaultRoute": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementVpcPrivateSubnet1DefaultRoute3B6879B5"
+          }
+        ],
+        "/NetworkStack-dev/ProductManagementVpc/PrivateSubnet2/Subnet": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementVpcPrivateSubnet2Subnet8E3772F0"
+          }
+        ],
+        "/NetworkStack-dev/ProductManagementVpc/PrivateSubnet2/RouteTable": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementVpcPrivateSubnet2RouteTable1B4FB37F"
+          }
+        ],
+        "/NetworkStack-dev/ProductManagementVpc/PrivateSubnet2/RouteTableAssociation": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementVpcPrivateSubnet2RouteTableAssociation8EC51902"
+          }
+        ],
+        "/NetworkStack-dev/ProductManagementVpc/PrivateSubnet2/DefaultRoute": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementVpcPrivateSubnet2DefaultRouteC807A4F4"
+          }
+        ],
+        "/NetworkStack-dev/ProductManagementVpc/IGW": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementVpcIGW529E5018"
+          }
+        ],
+        "/NetworkStack-dev/ProductManagementVpc/VPCGW": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementVpcVPCGWBD9F6C9C"
+          }
+        ],
+        "/NetworkStack-dev/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/NetworkStack-dev/Exports/Output{\"Ref\":\"ProductManagementVpcPublicSubnet1Subnet81E1FB93\"}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputRefProductManagementVpcPublicSubnet1Subnet81E1FB938D5336BF"
+          }
+        ],
+        "/NetworkStack-dev/Exports/Output{\"Ref\":\"ProductManagementVpcPublicSubnet2SubnetC29A34F8\"}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputRefProductManagementVpcPublicSubnet2SubnetC29A34F8C2D30391"
+          }
+        ],
+        "/NetworkStack-dev/Exports/Output{\"Ref\":\"ProductManagementVpc10564D87\"}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputRefProductManagementVpc10564D87BE3B0F48"
+          }
+        ],
+        "/NetworkStack-dev/Exports/Output{\"Ref\":\"ProductManagementVpcPrivateSubnet1SubnetA221E230\"}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputRefProductManagementVpcPrivateSubnet1SubnetA221E230B5A8DC4E"
+          }
+        ],
+        "/NetworkStack-dev/Exports/Output{\"Ref\":\"ProductManagementVpcPrivateSubnet2Subnet8E3772F0\"}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputRefProductManagementVpcPrivateSubnet2Subnet8E3772F05A985E9A"
+          }
+        ],
+        "/NetworkStack-dev/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/NetworkStack-dev/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "NetworkStack-dev"
+    },
+    "DatabaseStack-dev.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "DatabaseStack-dev.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "DatabaseStack-dev": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://205930626213/us-east-2",
+      "properties": {
+        "templateFile": "DatabaseStack-dev.template.json",
+        "terminationProtection": false,
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::205930626213:role/cdk-hnb659fds-deploy-role-205930626213-us-east-2",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::205930626213:role/cdk-hnb659fds-cfn-exec-role-205930626213-us-east-2",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-205930626213-us-east-2/cf7f0a22c28aada05a706b84bba8b0b87ba82eadc921eda0faac39fe2474c9a3.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "DatabaseStack-dev.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::205930626213:role/cdk-hnb659fds-lookup-role-205930626213-us-east-2",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "DatabaseStack-dev.assets"
+      ],
+      "metadata": {
+        "/DatabaseStack-dev/ProductsTable": [
+          {
+            "type": "aws:cdk:hasPhysicalName",
+            "data": {
+              "Ref": "ProductsTable241ADBFF"
+            }
+          }
+        ],
+        "/DatabaseStack-dev/ProductsTable/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductsTable241ADBFF"
+          }
+        ],
+        "/DatabaseStack-dev/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/DatabaseStack-dev/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/DatabaseStack-dev/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "DatabaseStack-dev"
+    },
+    "ContainerRegistryStack-dev.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "ContainerRegistryStack-dev.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "ContainerRegistryStack-dev": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://205930626213/us-east-2",
+      "properties": {
+        "templateFile": "ContainerRegistryStack-dev.template.json",
+        "terminationProtection": false,
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::205930626213:role/cdk-hnb659fds-deploy-role-205930626213-us-east-2",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::205930626213:role/cdk-hnb659fds-cfn-exec-role-205930626213-us-east-2",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-205930626213-us-east-2/c08634662c033a1f07f4694a2273e7864e3bc1fe1f7426067bef54f9dc7d9b1f.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "ContainerRegistryStack-dev.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::205930626213:role/cdk-hnb659fds-lookup-role-205930626213-us-east-2",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "ContainerRegistryStack-dev.assets"
+      ],
+      "metadata": {
+        "/ContainerRegistryStack-dev/ProductManagementRepo/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementRepo6F667CF3"
+          }
+        ],
+        "/ContainerRegistryStack-dev/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/ContainerRegistryStack-dev/Exports/Output{\"Fn::GetAtt\":[\"ProductManagementRepo6F667CF3\",\"Arn\"]}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputFnGetAttProductManagementRepo6F667CF3Arn905153F3"
+          }
+        ],
+        "/ContainerRegistryStack-dev/Exports/Output{\"Ref\":\"ProductManagementRepo6F667CF3\"}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ExportsOutputRefProductManagementRepo6F667CF33DB694B0"
+          }
+        ],
+        "/ContainerRegistryStack-dev/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/ContainerRegistryStack-dev/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "ContainerRegistryStack-dev"
+    },
+    "ECSFargateServiceStack-dev.assets": {
+      "type": "cdk:asset-manifest",
+      "properties": {
+        "file": "ECSFargateServiceStack-dev.assets.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+      }
+    },
+    "ECSFargateServiceStack-dev": {
+      "type": "aws:cloudformation:stack",
+      "environment": "aws://205930626213/us-east-2",
+      "properties": {
+        "templateFile": "ECSFargateServiceStack-dev.template.json",
+        "terminationProtection": false,
+        "validateOnSynth": false,
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::205930626213:role/cdk-hnb659fds-deploy-role-205930626213-us-east-2",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::205930626213:role/cdk-hnb659fds-cfn-exec-role-205930626213-us-east-2",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-205930626213-us-east-2/a9ac3decad1a2055ee0b9e23c8d01fc2c3d9306c2461d3b633cbfaa4ecc50033.json",
+        "requiresBootstrapStackVersion": 6,
+        "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
+        "additionalDependencies": [
+          "ECSFargateServiceStack-dev.assets"
+        ],
+        "lookupRole": {
+          "arn": "arn:${AWS::Partition}:iam::205930626213:role/cdk-hnb659fds-lookup-role-205930626213-us-east-2",
+          "requiresBootstrapStackVersion": 8,
+          "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
+        }
+      },
+      "dependencies": [
+        "NetworkStack-dev",
+        "ContainerRegistryStack-dev",
+        "ECSFargateServiceStack-dev.assets"
+      ],
+      "metadata": {
+        "/ECSFargateServiceStack-dev/ProductManagementCluster/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementCluster13F04465"
+          }
+        ],
+        "/ECSFargateServiceStack-dev/ProductManagementFargateService/LB/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementFargateServiceLBD33B28C0"
+          }
+        ],
+        "/ECSFargateServiceStack-dev/ProductManagementFargateService/LB/SecurityGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementFargateServiceLBSecurityGroup686FC6B2"
+          }
+        ],
+        "/ECSFargateServiceStack-dev/ProductManagementFargateService/LB/SecurityGroup/to ECSFargateServiceStackdevProductManagementFargateServiceSecurityGroup8C977FF2:80": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementFargateServiceLBSecurityGrouptoECSFargateServiceStackdevProductManagementFargateServiceSecurityGroup8C977FF28021BB88CA"
+          }
+        ],
+        "/ECSFargateServiceStack-dev/ProductManagementFargateService/LB/PublicListener/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementFargateServiceLBPublicListener7ACDAA54"
+          }
+        ],
+        "/ECSFargateServiceStack-dev/ProductManagementFargateService/LB/PublicListener/ECSGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementFargateServiceLBPublicListenerECSGroup90E1DC2F"
+          }
+        ],
+        "/ECSFargateServiceStack-dev/ProductManagementFargateService/LoadBalancerDNS": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementFargateServiceLoadBalancerDNS7111EF6D"
+          }
+        ],
+        "/ECSFargateServiceStack-dev/ProductManagementFargateService/ServiceURL": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementFargateServiceServiceURL503C5306"
+          }
+        ],
+        "/ECSFargateServiceStack-dev/ProductManagementFargateService/TaskDef/TaskRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementFargateServiceTaskDefTaskRoleC0A9A258"
+          }
+        ],
+        "/ECSFargateServiceStack-dev/ProductManagementFargateService/TaskDef/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementFargateServiceTaskDef07D0257D"
+          }
+        ],
+        "/ECSFargateServiceStack-dev/ProductManagementFargateService/TaskDef/web/LogGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementFargateServiceTaskDefwebLogGroup6D5D25E1"
+          }
+        ],
+        "/ECSFargateServiceStack-dev/ProductManagementFargateService/TaskDef/ExecutionRole/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementFargateServiceTaskDefExecutionRoleB3A85826"
+          }
+        ],
+        "/ECSFargateServiceStack-dev/ProductManagementFargateService/TaskDef/ExecutionRole/DefaultPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementFargateServiceTaskDefExecutionRoleDefaultPolicy78FA2A27"
+          }
+        ],
+        "/ECSFargateServiceStack-dev/ProductManagementFargateService/Service": [
+          {
+            "type": "aws:cdk:warning",
+            "data": "minHealthyPercent has not been configured so the default value of 50% is used. The number of running tasks will decrease below the desired count during deployments etc. See https://github.com/aws/aws-cdk/issues/31705 [ack: @aws-cdk/aws-ecs:minHealthyPercent]",
+            "trace": [
+              "Annotations.addMessage (/var/folders/b1/dz3prjns4fd09hv06_ntz5_r0000gn/T/jsii-kernel-a0aC3u/node_modules/aws-cdk-lib/core/lib/annotations.js:1:1608)",
+              "Annotations.addWarningV2 (/var/folders/b1/dz3prjns4fd09hv06_ntz5_r0000gn/T/jsii-kernel-a0aC3u/node_modules/aws-cdk-lib/core/lib/annotations.js:1:825)",
+              "new BaseService (/var/folders/b1/dz3prjns4fd09hv06_ntz5_r0000gn/T/jsii-kernel-a0aC3u/node_modules/aws-cdk-lib/aws-ecs/lib/base/base-service.js:1:8100)",
+              "new FargateService (/var/folders/b1/dz3prjns4fd09hv06_ntz5_r0000gn/T/jsii-kernel-a0aC3u/node_modules/aws-cdk-lib/aws-ecs/lib/fargate/fargate-service.js:1:3551)",
+              "new ApplicationLoadBalancedFargateService (/var/folders/b1/dz3prjns4fd09hv06_ntz5_r0000gn/T/jsii-kernel-a0aC3u/node_modules/aws-cdk-lib/aws-ecs-patterns/lib/fargate/application-load-balanced-fargate-service.js:1:3340)",
+              "Kernel._Kernel_create (/private/var/folders/b1/dz3prjns4fd09hv06_ntz5_r0000gn/T/m00jobap.4wc/lib/program.js:548:25)",
+              "Kernel.create (/private/var/folders/b1/dz3prjns4fd09hv06_ntz5_r0000gn/T/m00jobap.4wc/lib/program.js:218:93)",
+              "KernelHost.processRequest (/private/var/folders/b1/dz3prjns4fd09hv06_ntz5_r0000gn/T/m00jobap.4wc/lib/program.js:15471:36)",
+              "KernelHost.run (/private/var/folders/b1/dz3prjns4fd09hv06_ntz5_r0000gn/T/m00jobap.4wc/lib/program.js:15431:22)",
+              "Immediate._onImmediate (/private/var/folders/b1/dz3prjns4fd09hv06_ntz5_r0000gn/T/m00jobap.4wc/lib/program.js:15432:46)",
+              "process.processImmediate (node:internal/timers:505:21)"
+            ]
+          }
+        ],
+        "/ECSFargateServiceStack-dev/ProductManagementFargateService/Service/Service": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementFargateService362B24E6"
+          }
+        ],
+        "/ECSFargateServiceStack-dev/ProductManagementFargateService/Service/SecurityGroup/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementFargateServiceSecurityGroup88126951"
+          }
+        ],
+        "/ECSFargateServiceStack-dev/ProductManagementFargateService/Service/SecurityGroup/from ECSFargateServiceStackdevProductManagementFargateServiceLBSecurityGroup7BEDA5E7:80": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductManagementFargateServiceSecurityGroupfromECSFargateServiceStackdevProductManagementFargateServiceLBSecurityGroup7BEDA5E7801DA6B753"
+          }
+        ],
+        "/ECSFargateServiceStack-dev/ProductsTableAccessPolicy/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "ProductsTableAccessPolicy23730DC3"
+          }
+        ],
+        "/ECSFargateServiceStack-dev/CDKMetadata/Default": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CDKMetadata"
+          }
+        ],
+        "/ECSFargateServiceStack-dev/BootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "BootstrapVersion"
+          }
+        ],
+        "/ECSFargateServiceStack-dev/CheckBootstrapVersion": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "CheckBootstrapVersion"
+          }
+        ]
+      },
+      "displayName": "ECSFargateServiceStack-dev"
+    },
+    "Tree": {
+      "type": "cdk:tree",
+      "properties": {
+        "file": "tree.json"
+      }
+    }
+  }
+}

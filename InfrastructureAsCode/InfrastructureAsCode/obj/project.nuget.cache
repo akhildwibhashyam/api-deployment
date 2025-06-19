@@ -1,0 +1,32 @@
+{
+  "version": 2,
+  "dgSpecHash": "MdT3xMSm2EU=",
+  "success": true,
+  "projectFilePath": "/Users/akhildwibhashyam/Desktop/DevOps_Assignment/Testing/devops-assignment-round-1-adwibha/DevOpsAssignment/InfrastructureAsCode/InfrastructureAsCode/InfrastructureAsCode.csproj",
+  "expectedPackageFiles": [
+    "/Users/akhildwibhashyam/.nuget/packages/amazon.cdk.asset.awscliv1/2.2.227/amazon.cdk.asset.awscliv1.2.2.227.nupkg.sha512",
+    "/Users/akhildwibhashyam/.nuget/packages/amazon.cdk.asset.nodeproxyagentv6/2.1.0/amazon.cdk.asset.nodeproxyagentv6.2.1.0.nupkg.sha512",
+    "/Users/akhildwibhashyam/.nuget/packages/amazon.cdk.cloudassembly.schema/40.7.0/amazon.cdk.cloudassembly.schema.40.7.0.nupkg.sha512",
+    "/Users/akhildwibhashyam/.nuget/packages/amazon.cdk.lib/2.184.1/amazon.cdk.lib.2.184.1.nupkg.sha512",
+    "/Users/akhildwibhashyam/.nuget/packages/amazon.jsii.runtime/1.109.0/amazon.jsii.runtime.1.109.0.nupkg.sha512",
+    "/Users/akhildwibhashyam/.nuget/packages/constructs/10.4.2/constructs.10.4.2.nupkg.sha512",
+    "/Users/akhildwibhashyam/.nuget/packages/microsoft.extensions.configuration/9.0.1/microsoft.extensions.configuration.9.0.1.nupkg.sha512",
+    "/Users/akhildwibhashyam/.nuget/packages/microsoft.extensions.configuration.abstractions/9.0.1/microsoft.extensions.configuration.abstractions.9.0.1.nupkg.sha512",
+    "/Users/akhildwibhashyam/.nuget/packages/microsoft.extensions.configuration.binder/9.0.1/microsoft.extensions.configuration.binder.9.0.1.nupkg.sha512",
+    "/Users/akhildwibhashyam/.nuget/packages/microsoft.extensions.dependencyinjection/9.0.1/microsoft.extensions.dependencyinjection.9.0.1.nupkg.sha512",
+    "/Users/akhildwibhashyam/.nuget/packages/microsoft.extensions.dependencyinjection.abstractions/9.0.1/microsoft.extensions.dependencyinjection.abstractions.9.0.1.nupkg.sha512",
+    "/Users/akhildwibhashyam/.nuget/packages/microsoft.extensions.logging/9.0.1/microsoft.extensions.logging.9.0.1.nupkg.sha512",
+    "/Users/akhildwibhashyam/.nuget/packages/microsoft.extensions.logging.abstractions/9.0.1/microsoft.extensions.logging.abstractions.9.0.1.nupkg.sha512",
+    "/Users/akhildwibhashyam/.nuget/packages/microsoft.extensions.logging.configuration/9.0.1/microsoft.extensions.logging.configuration.9.0.1.nupkg.sha512",
+    "/Users/akhildwibhashyam/.nuget/packages/microsoft.extensions.logging.console/9.0.1/microsoft.extensions.logging.console.9.0.1.nupkg.sha512",
+    "/Users/akhildwibhashyam/.nuget/packages/microsoft.extensions.options/9.0.1/microsoft.extensions.options.9.0.1.nupkg.sha512",
+    "/Users/akhildwibhashyam/.nuget/packages/microsoft.extensions.options.configurationextensions/9.0.1/microsoft.extensions.options.configurationextensions.9.0.1.nupkg.sha512",
+    "/Users/akhildwibhashyam/.nuget/packages/microsoft.extensions.primitives/9.0.1/microsoft.extensions.primitives.9.0.1.nupkg.sha512",
+    "/Users/akhildwibhashyam/.nuget/packages/newtonsoft.json/13.0.3/newtonsoft.json.13.0.3.nupkg.sha512",
+    "/Users/akhildwibhashyam/.nuget/packages/system.diagnostics.diagnosticsource/9.0.1/system.diagnostics.diagnosticsource.9.0.1.nupkg.sha512",
+    "/Users/akhildwibhashyam/.nuget/packages/system.io.pipelines/9.0.1/system.io.pipelines.9.0.1.nupkg.sha512",
+    "/Users/akhildwibhashyam/.nuget/packages/system.text.encodings.web/9.0.1/system.text.encodings.web.9.0.1.nupkg.sha512",
+    "/Users/akhildwibhashyam/.nuget/packages/system.text.json/9.0.1/system.text.json.9.0.1.nupkg.sha512"
+  ],
+  "logs": []
+}

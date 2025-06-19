@@ -1,0 +1,246 @@
+# Product Management System API – Production-Grade Documentation
+
+---
+
+## 1. Project Overview
+This is a modular, scalable, and secure Product Management System API built with .NET 8, AWS CDK (C#), and AWS services (ECS, ECR, DynamoDB, CloudWatch, etc.). The system is containerized using Docker and deployed to AWS using Infrastructure as Code. CI/CD is managed via GitHub Actions. The solution supports multi-region, multi-environment deployments and follows DevOps and security best practices.
+
+---
+
+## 2. Repository Structure
+```
+├── .github/
+│   └── workflows/
+│       ├── pipeline.yaml      # Main CI/CD pipeline
+│       └── cleanup.yaml       # Resource cleanup workflow
+├── InfrastructureAsCode/
+│   └── InfrastructureAsCode/
+│       ├── Stacks/            # CDK stacks: VPC, DynamoDB, ECR, ECS
+│       ├── Program.cs         # CDK app entry point
+├── ProductManagementSystem/
+│   ├── Application/           # Business logic
+│   ├── Infrastructure/        # Data access (DynamoDB)
+│   ├── Presentation/          # API controllers, middleware
+│   ├── Program.cs             # Main API entry point
+├── ProductManagementSystem.Tests/
+│   └── ...                    # Unit and integration tests
+├── scripts/
+│   └── ...                    # Helper scripts
+├── README.md                  # Quick start and architecture
+├── documentation.txt          # This detailed documentation
+```
+
+---
+
+## 3. Prerequisites
+- **AWS Account** with permissions for ECS, ECR, DynamoDB, VPC, IAM, CloudFormation.
+- **AWS CLI** installed and configured (`aws configure`).
+- **Node.js** (v16+) and **npm**.
+- **.NET SDK** (v7+).
+- **Docker** (for local builds and testing).
+- **AWS CDK** installed globally:
+  ```bash
+  npm install -g aws-cdk
+  ```
+- **GitHub Account** (for CI/CD and secrets management).
+
+---
+
+## 4. Environment Variables & Secrets
+
+### A. GitHub Repository Secrets
+Set these in your GitHub repository **before running the pipeline**:
+
+| Secret Name                 | Description                                 |
+|-----------------------------|---------------------------------------------|
+| `AWS_ACCESS_KEY_ID`         | AWS access key (with deploy permissions)    |
+| `AWS_SECRET_ACCESS_KEY`     | AWS secret key                              |
+| `AWS_ACCOUNT_ID`            | Your AWS account ID                         |
+| `SMTP_SERVER`               | SMTP server for email notifications         |
+| `SMTP_PORT`                 | SMTP port                                   |
+| `SMTP_USERNAME`             | SMTP username                               |
+| `SMTP_PASSWORD`             | SMTP password                               |
+| `SMTP_FROM`                 | Sender email address                        |
+| `NOTIFICATION_EMAIL`        | Recipient email for notifications           |
+
+**Never commit secrets to the repository.**
+
+### B. Application Environment Variables
+These are set by the pipeline or in your deployment environment:
+
+| Variable Name               | Description                                 |
+|-----------------------------|---------------------------------------------|
+| `DEPLOY_ENV`                | `dev` or `prod` (controls resource naming)  |
+| `CDK_DEFAULT_REGION`        | AWS region (e.g., `us-east-2`, `us-east-1`)|
+| `CDK_DEFAULT_ACCOUNT`       | AWS account ID                              |
+| `ECR_IMAGE_TAG`             | Docker image tag (set by pipeline)          |
+| `DYNAMODB_TABLE_NAME`       | DynamoDB table name (auto-named by env)     |
+| `AWS_REGION`                | AWS region for SDKs                         |
+| `DYNAMODB_ENDPOINT`         | (Dev only) Local DynamoDB endpoint          |
+| `AWS_ACCESS_KEY_ID_DEV`     | (Dev only) Dummy AWS key for local DynamoDB |
+| `AWS_SECRET_ACCESS_KEY_DEV` | (Dev only) Dummy AWS secret for local DynamoDB |
+
+---
+
+## 5. Local Development & Testing
+
+- **Run DynamoDB locally** (for dev):
+  ```bash
+  docker run -p 8000:8000 amazon/dynamodb-local
+  ```
+- **Set local environment variables** (for dev):
+  ```bash
+  export AWS_ACCESS_KEY_ID_DEV=dummy_key
+  export AWS_SECRET_ACCESS_KEY_DEV=dummy_secret
+  export DYNAMODB_ENDPOINT=http://localhost:8000
+  export DYNAMODB_TABLE_NAME=Products-dev
+  ```
+- **Run the API locally**:
+  ```bash
+  cd ProductManagementSystem
+  dotnet run
+  ```
+- **Swagger UI**: http://localhost:5000/swagger
+- **Run tests**:
+  ```bash
+  cd ../ProductManagementSystem.Tests
+  dotnet test
+  ```
+
+---
+
+## 6. Dockerization
+
+- **Build Docker Image**
+  ```bash
+  docker build -t product-management-system .
+  ```
+- **Run Docker Container**
+  ```bash
+  docker run -p 5164:80 --env-file .env product-management-system
+  ```
+- **Push to ECR**
+  1. Authenticate Docker to ECR:
+     ```bash
+     aws ecr get-login-password --region <region> | docker login --username AWS --password-stdin <account-id>.dkr.ecr.<region>.amazonaws.com
+     ```
+  2. Tag and push:
+     ```bash
+     docker tag product-management-system:latest <account-id>.dkr.ecr.<region>.amazonaws.com/<repo-name>:latest
+     docker push <account-id>.dkr.ecr.<region>.amazonaws.com/<repo-name>:latest
+     ```
+
+---
+
+## 7. Infrastructure as Code (AWS CDK)
+
+- **Bootstrap CDK (first time per account/region)**
+  ```bash
+  cd InfrastructureAsCode/InfrastructureAsCode
+  cdk bootstrap
+  ```
+- **Deploy Stacks**
+  ```bash
+  cdk deploy
+  ```
+- **CDK Context**
+  - `cdk.context.json` stores environment-specific context.
+  - `cdk.json` defines the CDK entrypoint.
+
+---
+
+## 8. CI/CD Pipeline
+
+- **pipeline.yaml**: Builds, tests, pushes Docker image, deploys with CDK.
+- **cleanup.yaml**: Destroys all AWS resources and ECR images for a clean slate.
+- **Secrets**: All AWS and SMTP credentials are injected via GitHub Secrets.
+- **Parallelization**: Deployments and builds are parallelized for speed.
+- **Resource Naming**: All resources are suffixed with environment and run ID for isolation.
+
+---
+
+## 9. Monitoring & Observability
+- **CloudWatch Dashboards**: Use `scripts/generate_dashboard.sh` to create/update dashboards for ECS, ALB, etc. Requires `jq` and AWS CLI.
+- **Serilog Logging**: Configured in `appsettings.json` and `appsettings.Development.json`. Logs to console by default. For production, consider adding sinks for CloudWatch, files, etc.
+
+---
+
+## 10. Security & Best Practices
+- IAM roles with least privilege.
+- No hardcoded secrets.
+- Environment isolation for dev/prod.
+- Trivy and ECR image scanning in CI/CD.
+- HTTPS redirection, error handling middleware, input validation.
+
+---
+
+## 11. Troubleshooting & Common Issues
+- **ECS CannotPullContainerError**: Check ECR image/tag, pipeline, and task definition.
+- **CDK Stack AlreadyExists**: Run cleanup workflow or manually delete resources.
+- **ALB Health Check Fails**: Ensure app listens on port 80 and `/health` is configured.
+- **Pipeline Fails**: Check GitHub Actions logs for missing secrets or AWS permission errors.
+- **Missing AWS permissions**: Check IAM roles and policies.
+- **Docker build errors**: Ensure .NET SDK and Docker are installed.
+- **CDK deploy errors**: Check AWS credentials and region.
+- **ECS service not starting**: Check logs in CloudWatch, verify image URI, environment variables.
+
+---
+
+## 12. Submission Checklist
+- [x] All code and infrastructure is in the repository.
+- [x] README and documentation are complete and up to date.
+- [x] No secrets or credentials are committed.
+- [x] GitHub Actions workflows are present and functional.
+- [x] All resources are created and destroyed via IaC (CDK).
+- [x] Application is accessible via ALB after deployment.
+- [x] Cleanup workflow tested and working.
+
+---
+
+## 13. Issues Faced & Troubleshooting Log
+
+### 1. ECR Repository Naming Mismatch
+- **Error:** ECS Fargate tasks failed with `CannotPullContainerError` due to image not found in ECR. Repo names like `product-management-system-dev-default` were created, but pipeline and ECS expected `product-management-system-dev`.
+- **Fix:** Simplified ECR repo naming in `ContainerRegistryStack.cs` to always use `product-management-system-{env}` (e.g., `product-management-system-dev`), removing any `-default` or extra suffix logic.
+
+### 2. ECR Image Deletion in Cleanup
+- **Error:** Cleanup job failed to delete ECR images due to incorrect usage of `--image-ids` (JSON parsing error).
+- **Fix:** Updated both `pipeline.yaml` and `cleanup.yaml` to always write image IDs to a file and use `--image-ids file://image_ids.json` for robust batch deletion.
+
+### 3. Multi-Region/Multi-Env Pipeline Issues
+- **Error:** Resource names and stacks were not unique per environment/region, causing conflicts.
+- **Fix:** All resource and stack names now include environment suffixes (e.g., `-dev`, `-prod`).
+
+### 4. CDK Bootstrap Race Condition
+- **Error:** CDK stacks failed to deploy if the environment was not bootstrapped.
+- **Fix:** Added a bootstrap job in the pipeline to ensure all regions/environments are bootstrapped before deployment.
+
+### 5. ECS Image Tag Consistency
+- **Error:** ECS task definition sometimes referenced a tag that was not pushed to ECR.
+- **Fix:** Pipeline and CDK now consistently use `${{ github.sha }}` as the image tag, and ECS stack reads this from the environment.
+
+### 6. Swagger UI Not Always Available
+- **Error:** Swagger UI was not always enabled at the root in the .NET app.
+- **Fix:** Updated `Program.cs` to always enable Swagger UI at the root path, regardless of environment.
+
+### 7. IAM Permissions for ECS/ECR
+- **Error:** ECS tasks failed to pull images due to missing ECR permissions.
+- **Fix:** CDK stack grants correct ECR permissions to ECS task execution role.
+
+### 8. Robust Cleanup Logic
+- **Error:** Cleanup jobs sometimes failed if ECR repo did not exist or had no images.
+- **Fix:** Cleanup jobs now check for repo existence and only attempt deletion if images exist.
+
+---
+
+## 14. References
+- [AWS CDK Documentation](https://docs.aws.amazon.com/cdk/latest/guide/home.html)
+- [GitHub Actions Documentation](https://docs.github.com/en/actions)
+- [Serilog Documentation](https://serilog.net/)
+- [Swagger/OpenAPI](https://swagger.io/)
+- [Docker Documentation](https://docs.docker.com/)
+- [AWS ECS Documentation](https://docs.aws.amazon.com/ecs/latest/developerguide/)
+
+---
+
+**This documentation is sufficient for any developer or reviewer to deploy, run, and maintain your Product Management System API in a production or development environment.** If you need a sample GitHub Actions workflow, `.env` file, or further details, let me know!

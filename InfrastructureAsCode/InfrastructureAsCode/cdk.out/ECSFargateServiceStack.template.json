@@ -1,0 +1,546 @@
+{
+ "Resources": {
+  "ProductManagementCluster13F04465": {
+   "Type": "AWS::ECS::Cluster",
+   "Metadata": {
+    "aws:cdk:path": "ECSFargateServiceStack/ProductManagementCluster/Resource"
+   }
+  },
+  "ProductManagementFargateServiceLBD33B28C0": {
+   "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+   "Properties": {
+    "LoadBalancerAttributes": [
+     {
+      "Key": "deletion_protection.enabled",
+      "Value": "false"
+     }
+    ],
+    "Scheme": "internet-facing",
+    "SecurityGroups": [
+     {
+      "Fn::GetAtt": [
+       "ProductManagementFargateServiceLBSecurityGroup686FC6B2",
+       "GroupId"
+      ]
+     }
+    ],
+    "Subnets": [
+     {
+      "Fn::ImportValue": "NetworkStack:ExportsOutputRefProductManagementVpcPublicSubnet1Subnet81E1FB938D5336BF"
+     },
+     {
+      "Fn::ImportValue": "NetworkStack:ExportsOutputRefProductManagementVpcPublicSubnet2SubnetC29A34F8C2D30391"
+     }
+    ],
+    "Type": "application"
+   },
+   "Metadata": {
+    "aws:cdk:path": "ECSFargateServiceStack/ProductManagementFargateService/LB/Resource"
+   }
+  },
+  "ProductManagementFargateServiceLBSecurityGroup686FC6B2": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "Automatically created Security Group for ELB ECSFargateServiceStackProductManagementFargateServiceLBCC2773F0",
+    "SecurityGroupIngress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow from anyone on port 80",
+      "FromPort": 80,
+      "IpProtocol": "tcp",
+      "ToPort": 80
+     }
+    ],
+    "VpcId": {
+     "Fn::ImportValue": "NetworkStack:ExportsOutputRefProductManagementVpc10564D87BE3B0F48"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ECSFargateServiceStack/ProductManagementFargateService/LB/SecurityGroup/Resource"
+   }
+  },
+  "ProductManagementFargateServiceLBSecurityGrouptoECSFargateServiceStackProductManagementFargateServiceSecurityGroup7058899F80CB57B9FB": {
+   "Type": "AWS::EC2::SecurityGroupEgress",
+   "Properties": {
+    "Description": "Load balancer to target",
+    "DestinationSecurityGroupId": {
+     "Fn::GetAtt": [
+      "ProductManagementFargateServiceSecurityGroup88126951",
+      "GroupId"
+     ]
+    },
+    "FromPort": 80,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "ProductManagementFargateServiceLBSecurityGroup686FC6B2",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "ToPort": 80
+   },
+   "Metadata": {
+    "aws:cdk:path": "ECSFargateServiceStack/ProductManagementFargateService/LB/SecurityGroup/to ECSFargateServiceStackProductManagementFargateServiceSecurityGroup7058899F:80"
+   }
+  },
+  "ProductManagementFargateServiceLBPublicListener7ACDAA54": {
+   "Type": "AWS::ElasticLoadBalancingV2::Listener",
+   "Properties": {
+    "DefaultActions": [
+     {
+      "TargetGroupArn": {
+       "Ref": "ProductManagementFargateServiceLBPublicListenerECSGroup90E1DC2F"
+      },
+      "Type": "forward"
+     }
+    ],
+    "LoadBalancerArn": {
+     "Ref": "ProductManagementFargateServiceLBD33B28C0"
+    },
+    "Port": 80,
+    "Protocol": "HTTP"
+   },
+   "Metadata": {
+    "aws:cdk:path": "ECSFargateServiceStack/ProductManagementFargateService/LB/PublicListener/Resource"
+   }
+  },
+  "ProductManagementFargateServiceLBPublicListenerECSGroup90E1DC2F": {
+   "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+   "Properties": {
+    "HealthCheckPath": "/health",
+    "Matcher": {
+     "HttpCode": "200"
+    },
+    "Port": 80,
+    "Protocol": "HTTP",
+    "TargetGroupAttributes": [
+     {
+      "Key": "stickiness.enabled",
+      "Value": "false"
+     }
+    ],
+    "TargetType": "ip",
+    "VpcId": {
+     "Fn::ImportValue": "NetworkStack:ExportsOutputRefProductManagementVpc10564D87BE3B0F48"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ECSFargateServiceStack/ProductManagementFargateService/LB/PublicListener/ECSGroup/Resource"
+   }
+  },
+  "ProductManagementFargateServiceTaskDefTaskRoleC0A9A258": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ECSFargateServiceStack/ProductManagementFargateService/TaskDef/TaskRole/Resource"
+   }
+  },
+  "ProductManagementFargateServiceTaskDef07D0257D": {
+   "Type": "AWS::ECS::TaskDefinition",
+   "Properties": {
+    "ContainerDefinitions": [
+     {
+      "Environment": [
+       {
+        "Name": "ASPNETCORE_ENVIRONMENT",
+        "Value": "Production"
+       },
+       {
+        "Name": "DYNAMODB_TABLE_NAME",
+        "Value": "Products"
+       },
+       {
+        "Name": "ASPNETCORE_URLS",
+        "Value": "http://+:80"
+       }
+      ],
+      "Essential": true,
+      "Image": {
+       "Fn::Join": [
+        "",
+        [
+         {
+          "Fn::Select": [
+           4,
+           {
+            "Fn::Split": [
+             ":",
+             {
+              "Fn::ImportValue": "ContainerRegistryStack:ExportsOutputFnGetAttProductManagementRepo6F667CF3Arn905153F3"
+             }
+            ]
+           }
+          ]
+         },
+         ".dkr.ecr.",
+         {
+          "Fn::Select": [
+           3,
+           {
+            "Fn::Split": [
+             ":",
+             {
+              "Fn::ImportValue": "ContainerRegistryStack:ExportsOutputFnGetAttProductManagementRepo6F667CF3Arn905153F3"
+             }
+            ]
+           }
+          ]
+         },
+         ".",
+         {
+          "Ref": "AWS::URLSuffix"
+         },
+         "/",
+         {
+          "Fn::ImportValue": "ContainerRegistryStack:ExportsOutputRefProductManagementRepo6F667CF33DB694B0"
+         },
+         ":latest"
+        ]
+       ]
+      },
+      "LogConfiguration": {
+       "LogDriver": "awslogs",
+       "Options": {
+        "awslogs-group": {
+         "Ref": "ProductManagementFargateServiceTaskDefwebLogGroup6D5D25E1"
+        },
+        "awslogs-stream-prefix": "ProductManagementFargateService",
+        "awslogs-region": "us-east-2"
+       }
+      },
+      "Name": "web",
+      "PortMappings": [
+       {
+        "ContainerPort": 80,
+        "Protocol": "tcp"
+       }
+      ]
+     }
+    ],
+    "Cpu": "512",
+    "ExecutionRoleArn": {
+     "Fn::GetAtt": [
+      "ProductManagementFargateServiceTaskDefExecutionRoleB3A85826",
+      "Arn"
+     ]
+    },
+    "Family": "ECSFargateServiceStackProductManagementFargateServiceTaskDef403E0CDC",
+    "Memory": "1024",
+    "NetworkMode": "awsvpc",
+    "RequiresCompatibilities": [
+     "FARGATE"
+    ],
+    "TaskRoleArn": {
+     "Fn::GetAtt": [
+      "ProductManagementFargateServiceTaskDefTaskRoleC0A9A258",
+      "Arn"
+     ]
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ECSFargateServiceStack/ProductManagementFargateService/TaskDef/Resource"
+   }
+  },
+  "ProductManagementFargateServiceTaskDefwebLogGroup6D5D25E1": {
+   "Type": "AWS::Logs::LogGroup",
+   "UpdateReplacePolicy": "Retain",
+   "DeletionPolicy": "Retain",
+   "Metadata": {
+    "aws:cdk:path": "ECSFargateServiceStack/ProductManagementFargateService/TaskDef/web/LogGroup/Resource"
+   }
+  },
+  "ProductManagementFargateServiceTaskDefExecutionRoleB3A85826": {
+   "Type": "AWS::IAM::Role",
+   "Properties": {
+    "AssumeRolePolicyDocument": {
+     "Statement": [
+      {
+       "Action": "sts:AssumeRole",
+       "Effect": "Allow",
+       "Principal": {
+        "Service": "ecs-tasks.amazonaws.com"
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    }
+   },
+   "Metadata": {
+    "aws:cdk:path": "ECSFargateServiceStack/ProductManagementFargateService/TaskDef/ExecutionRole/Resource"
+   }
+  },
+  "ProductManagementFargateServiceTaskDefExecutionRoleDefaultPolicy78FA2A27": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:GetDownloadUrlForLayer",
+        "ecr:BatchGetImage"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::ImportValue": "ContainerRegistryStack:ExportsOutputFnGetAttProductManagementRepo6F667CF3Arn905153F3"
+       }
+      },
+      {
+       "Action": "ecr:GetAuthorizationToken",
+       "Effect": "Allow",
+       "Resource": "*"
+      },
+      {
+       "Action": [
+        "logs:CreateLogStream",
+        "logs:PutLogEvents"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "ProductManagementFargateServiceTaskDefwebLogGroup6D5D25E1",
+         "Arn"
+        ]
+       }
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "ProductManagementFargateServiceTaskDefExecutionRoleDefaultPolicy78FA2A27",
+    "Roles": [
+     {
+      "Ref": "ProductManagementFargateServiceTaskDefExecutionRoleB3A85826"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "ECSFargateServiceStack/ProductManagementFargateService/TaskDef/ExecutionRole/DefaultPolicy/Resource"
+   }
+  },
+  "ProductManagementFargateService362B24E6": {
+   "Type": "AWS::ECS::Service",
+   "Properties": {
+    "Cluster": {
+     "Ref": "ProductManagementCluster13F04465"
+    },
+    "DeploymentConfiguration": {
+     "Alarms": {
+      "AlarmNames": [],
+      "Enable": false,
+      "Rollback": false
+     },
+     "MaximumPercent": 200,
+     "MinimumHealthyPercent": 50
+    },
+    "DesiredCount": 2,
+    "EnableECSManagedTags": false,
+    "HealthCheckGracePeriodSeconds": 60,
+    "LaunchType": "FARGATE",
+    "LoadBalancers": [
+     {
+      "ContainerName": "web",
+      "ContainerPort": 80,
+      "TargetGroupArn": {
+       "Ref": "ProductManagementFargateServiceLBPublicListenerECSGroup90E1DC2F"
+      }
+     }
+    ],
+    "NetworkConfiguration": {
+     "AwsvpcConfiguration": {
+      "AssignPublicIp": "DISABLED",
+      "SecurityGroups": [
+       {
+        "Fn::GetAtt": [
+         "ProductManagementFargateServiceSecurityGroup88126951",
+         "GroupId"
+        ]
+       }
+      ],
+      "Subnets": [
+       {
+        "Fn::ImportValue": "NetworkStack:ExportsOutputRefProductManagementVpcPrivateSubnet1SubnetA221E230B5A8DC4E"
+       },
+       {
+        "Fn::ImportValue": "NetworkStack:ExportsOutputRefProductManagementVpcPrivateSubnet2Subnet8E3772F05A985E9A"
+       }
+      ]
+     }
+    },
+    "TaskDefinition": {
+     "Ref": "ProductManagementFargateServiceTaskDef07D0257D"
+    }
+   },
+   "DependsOn": [
+    "ProductManagementFargateServiceLBPublicListenerECSGroup90E1DC2F",
+    "ProductManagementFargateServiceLBPublicListener7ACDAA54",
+    "ProductManagementFargateServiceTaskDefTaskRoleC0A9A258"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "ECSFargateServiceStack/ProductManagementFargateService/Service/Service"
+   }
+  },
+  "ProductManagementFargateServiceSecurityGroup88126951": {
+   "Type": "AWS::EC2::SecurityGroup",
+   "Properties": {
+    "GroupDescription": "ECSFargateServiceStack/ProductManagementFargateService/Service/SecurityGroup",
+    "SecurityGroupEgress": [
+     {
+      "CidrIp": "0.0.0.0/0",
+      "Description": "Allow all outbound traffic by default",
+      "IpProtocol": "-1"
+     }
+    ],
+    "VpcId": {
+     "Fn::ImportValue": "NetworkStack:ExportsOutputRefProductManagementVpc10564D87BE3B0F48"
+    }
+   },
+   "DependsOn": [
+    "ProductManagementFargateServiceTaskDefTaskRoleC0A9A258"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "ECSFargateServiceStack/ProductManagementFargateService/Service/SecurityGroup/Resource"
+   }
+  },
+  "ProductManagementFargateServiceSecurityGroupfromECSFargateServiceStackProductManagementFargateServiceLBSecurityGroupA5F9B7FF8087A445A9": {
+   "Type": "AWS::EC2::SecurityGroupIngress",
+   "Properties": {
+    "Description": "Load balancer to target",
+    "FromPort": 80,
+    "GroupId": {
+     "Fn::GetAtt": [
+      "ProductManagementFargateServiceSecurityGroup88126951",
+      "GroupId"
+     ]
+    },
+    "IpProtocol": "tcp",
+    "SourceSecurityGroupId": {
+     "Fn::GetAtt": [
+      "ProductManagementFargateServiceLBSecurityGroup686FC6B2",
+      "GroupId"
+     ]
+    },
+    "ToPort": 80
+   },
+   "DependsOn": [
+    "ProductManagementFargateServiceTaskDefTaskRoleC0A9A258"
+   ],
+   "Metadata": {
+    "aws:cdk:path": "ECSFargateServiceStack/ProductManagementFargateService/Service/SecurityGroup/from ECSFargateServiceStackProductManagementFargateServiceLBSecurityGroupA5F9B7FF:80"
+   }
+  },
+  "ProductsTableAccessPolicy23730DC3": {
+   "Type": "AWS::IAM::Policy",
+   "Properties": {
+    "PolicyDocument": {
+     "Statement": [
+      {
+       "Action": [
+        "dynamodb:DescribeTable",
+        "dynamodb:Query",
+        "dynamodb:Scan",
+        "dynamodb:GetItem",
+        "dynamodb:PutItem",
+        "dynamodb:UpdateItem",
+        "dynamodb:DeleteItem"
+       ],
+       "Effect": "Allow",
+       "Resource": "arn:aws:dynamodb:us-east-2:205930626213:table/Products"
+      }
+     ],
+     "Version": "2012-10-17"
+    },
+    "PolicyName": "ProductsTableAccessPolicy23730DC3",
+    "Roles": [
+     {
+      "Ref": "ProductManagementFargateServiceTaskDefTaskRoleC0A9A258"
+     }
+    ]
+   },
+   "Metadata": {
+    "aws:cdk:path": "ECSFargateServiceStack/ProductsTableAccessPolicy/Resource"
+   }
+  },
+  "CDKMetadata": {
+   "Type": "AWS::CDK::Metadata",
+   "Properties": {
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/31RXU8CMRD8LbzfFQ9N5MUHBTQmBA0QX8lSlstKaS/tFkMu99/dHh9BNKYPnZ3OZDptTxX9O1V04CvkerXJDS1VPWPQm0yoRY06qHpgYmD02WBtT/AZfAmMcwibIa7JEpOzSXDNOMtAFv0Fd/TO0O9IYzIdYZNJ3KIClgQb1GNVGdKQPGMHqycwYDWuruxoIDBpI4plqyBb7nqq/tvdlvgxX+pIutmj5oQvzueSjPziXawOVc9jurlkzlBHT7w/S/4nRqXHEH7Rr7blm4xgq+qpM+0btfu7k7vs03hATWZcKT80duU54oSbJk1vkavI2RSDiz498dDxBLnbVzfqvqsmo/nAeZSS+Qf6ICUfdreq6BZyLKvzGYhyHy3TFtX0sH8Dxk3K7TQCAAA="
+   },
+   "Metadata": {
+    "aws:cdk:path": "ECSFargateServiceStack/CDKMetadata/Default"
+   }
+  }
+ },
+ "Outputs": {
+  "ProductManagementFargateServiceLoadBalancerDNS7111EF6D": {
+   "Value": {
+    "Fn::GetAtt": [
+     "ProductManagementFargateServiceLBD33B28C0",
+     "DNSName"
+    ]
+   }
+  },
+  "ProductManagementFargateServiceServiceURL503C5306": {
+   "Value": {
+    "Fn::Join": [
+     "",
+     [
+      "http://",
+      {
+       "Fn::GetAtt": [
+        "ProductManagementFargateServiceLBD33B28C0",
+        "DNSName"
+       ]
+      }
+     ]
+    ]
+   }
+  }
+ },
+ "Parameters": {
+  "BootstrapVersion": {
+   "Type": "AWS::SSM::Parameter::Value<String>",
+   "Default": "/cdk-bootstrap/hnb659fds/version",
+   "Description": "Version of the CDK Bootstrap resources in this environment, automatically retrieved from SSM Parameter Store. [cdk:skip]"
+  }
+ },
+ "Rules": {
+  "CheckBootstrapVersion": {
+   "Assertions": [
+    {
+     "Assert": {
+      "Fn::Not": [
+       {
+        "Fn::Contains": [
+         [
+          "1",
+          "2",
+          "3",
+          "4",
+          "5"
+         ],
+         {
+          "Ref": "BootstrapVersion"
+         }
+        ]
+       }
+      ]
+     },
+     "AssertDescription": "CDK bootstrap stack version 6 required. Please run 'cdk bootstrap' with a recent version of the CDK CLI."
+    }
+   ]
+  }
+ }
+}

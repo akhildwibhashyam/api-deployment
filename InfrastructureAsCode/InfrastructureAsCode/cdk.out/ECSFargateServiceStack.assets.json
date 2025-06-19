@@ -1,0 +1,20 @@
+{
+  "version": "40.0.0",
+  "files": {
+    "b1c4cf5e0aca05f74df05a198ce00fee7161fae79c8f1f8c51db3f266ffba857": {
+      "source": {
+        "path": "ECSFargateServiceStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "205930626213-us-east-2": {
+          "bucketName": "cdk-hnb659fds-assets-205930626213-us-east-2",
+          "objectKey": "b1c4cf5e0aca05f74df05a198ce00fee7161fae79c8f1f8c51db3f266ffba857.json",
+          "region": "us-east-2",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::205930626213:role/cdk-hnb659fds-file-publishing-role-205930626213-us-east-2"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}
